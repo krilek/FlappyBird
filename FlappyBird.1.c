@@ -14,8 +14,6 @@ int main()
     
     //Quit SDL
     SDL_Quit();
-    Engine g;
-    Engine *gPtr = &g;
     construct(gPtr);
 	//Start up SDL and create window
 	if( !init(gPtr) )

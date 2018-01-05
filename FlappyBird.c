@@ -1,3 +1,4 @@
+//Using SDL, standard IO, and strings
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,8 +23,54 @@ SDL_Window* gWindow = NULL;
 //The surface contained by the window
 SDL_Surface* gScreenSurface = NULL;
 
-//Current displayed image
-SDL_Surface* gCurrentSurface = NULL;
+
+int main( int argc, char* args[] )
+{
+	//Start up SDL and create window
+	if( !init() )
+	{
+		printf( "Failed to initialize!\n" );
+	}
+	else
+	{
+			//Main loop flag
+			bool quit = false;
+
+			//Event handler
+			SDL_Event e;
+
+			//While application is running
+			while( !quit )
+			{
+				//Handle events on queue
+				while( SDL_PollEvent( &e ) != 0 )
+				{
+					//User requests quit
+					if( e.type == SDL_QUIT )
+					{
+						quit = true;
+					}
+					//User presses a key
+					else if( e.type == SDL_KEYDOWN )
+					{
+						//Select surfaces based on key press
+						switch( e.key.keysym.sym )
+						{
+							
+						}
+					}
+				}
+
+				//Update the surface
+				SDL_UpdateWindowSurface( gWindow );
+			}
+	}
+
+	//Free resources and close SDL
+	close();
+
+	return 0;
+}
 
 bool init()
 {
@@ -78,54 +125,3 @@ SDL_Surface* loadSurface( char  *path )
 	return loadedSurface;
 }
 
-
-int main( int argc, char* args[] )
-{
-	//Start up SDL and create window
-	if( !init() )
-	{
-		printf( "Failed to initialize!\n" );
-	}
-	else
-	{
-			//Main loop flag
-			bool quit = false;
-
-			//Event handler
-			SDL_Event e;
-
-			//While application is running
-			while( !quit )
-			{
-				//Handle events on queue
-				while( SDL_PollEvent( &e ) != 0 )
-				{
-					//User requests quit
-					if( e.type == SDL_QUIT )
-					{
-						quit = true;
-					}
-					//User presses a key
-					else if( e.type == SDL_KEYDOWN )
-					{
-						//Select surfaces based on key press
-						switch( e.key.keysym.sym )
-						{
-							
-						}
-					}
-				}
-
-				//Apply the current image
-				SDL_BlitSurface( gCurrentSurface, NULL, gScreenSurface, NULL );
-
-				//Update the surface
-				SDL_UpdateWindowSurface( gWindow );
-			}
-	}
-
-	//Free resources and close SDL
-	close();
-
-	return 0;
-}

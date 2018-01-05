@@ -2,40 +2,98 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include "Engine.h"
-#include "Bird.h"
+//Screen dimension constants
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
+
+//Starts up SDL and creates window
+bool init();
+
+//Frees media and shuts down SDL
+void close();
 
 //Loads individual image
 SDL_Surface* loadSurface( char *path );
 
-int main()
+//The window we'll be rendering to
+SDL_Window* gWindow = NULL;
+
+//The surface contained by the window
+SDL_Surface* gScreenSurface = NULL;
+
+//Current displayed image
+SDL_Surface* gCurrentSurface = NULL;
+
+bool init()
 {
-	SDL_Init( SDL_INIT_EVERYTHING );
-    
-    //Quit SDL
-    SDL_Quit();
-    Engine g;
-    Engine *gPtr = &g;
-    construct(gPtr);
+	//Initialization flag
+	bool success = true;
+
+	//Initialize SDL
+	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+	{
+		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
+		success = false;
+	}
+	else
+	{
+		//Create window
+		gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		if( gWindow == NULL )
+		{
+			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+			success = false;
+		}
+		else
+		{
+			//Get window surface
+			gScreenSurface = SDL_GetWindowSurface( gWindow );
+		}
+	}
+
+	return success;
+}
+
+
+void close()
+{
+	//Destroy window
+	SDL_DestroyWindow( gWindow );
+	gWindow = NULL;
+
+	//Quit SDL subsystems
+	SDL_Quit();
+}
+
+SDL_Surface* loadSurface( char  *path )
+{
+	//Load image at specified path
+	SDL_Surface* loadedSurface = SDL_LoadBMP( path );
+	if( loadedSurface == NULL )
+	{
+		printf( "Unable to load image %s! SDL Error: %s\n", path, SDL_GetError() );
+	}
+
+	return loadedSurface;
+}
+
+
+int main( int argc, char* args[] )
+{
 	//Start up SDL and create window
-	if( !init(gPtr) )
+	if( !init() )
 	{
 		printf( "Failed to initialize!\n" );
 	}
 	else
 	{
-		//Load media
-		if( !loadMedia() )
-		{
-			printf( "Failed to load media!\n" );
-		}
-		else
-		{	
 			//Main loop flag
 			bool quit = false;
 
 			//Event handler
 			SDL_Event e;
+
 			//While application is running
 			while( !quit )
 			{
@@ -51,39 +109,19 @@ int main()
 					else if( e.type == SDL_KEYDOWN )
 					{
 						//Select surfaces based on key press
-						// switch( e.key.keysym.sym )
-						// {
-
-						// 	// case SDLK_UP:
-						// 	// gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_UP ];
-						// 	// break;
-
-						// 	// case SDLK_DOWN:
-						// 	// gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_DOWN ];
-						// 	// break;
-
-						// 	// case SDLK_LEFT:
-						// 	// gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_LEFT ];
-						// 	// break;
-
-						// 	// case SDLK_RIGHT:
-						// 	// gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_RIGHT ];
-						// 	// break;
-
-						// 	// default:
-						// 	// gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_DEFAULT ];
-						// 	// break;
-						// }
+						switch( e.key.keysym.sym )
+						{
+							
+						}
 					}
 				}
 
 				//Apply the current image
-				// SDL_BlitSurface( gCurrentSurface, NULL, game->mWindowSurface, NULL );
-			
+				SDL_BlitSurface( gCurrentSurface, NULL, gScreenSurface, NULL );
+
 				//Update the surface
-				SDL_UpdateWindowSurface( g.mWindowSurface );
+				SDL_UpdateWindowSurface( gWindow );
 			}
-		}
 	}
 
 	//Free resources and close SDL
@@ -91,16 +129,3 @@ int main()
 
 	return 0;
 }
-
-SDL_Surface* loadSurface( char *path )
-{
-	//Load image at specified path
-	SDL_Surface* loadedSurface = SDL_LoadBMP( path );
-	if( loadedSurface == NULL )
-	{
-		printf( "Unable to load image %s! SDL Error: %s\n", path, SDL_GetError() );
-	}
-
-	return loadedSurface;
-}
-

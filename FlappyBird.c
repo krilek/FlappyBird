@@ -1,127 +1,180 @@
-//Using SDL, standard IO, and strings
 #include <SDL2/SDL.h>
-#include <stdio.h>
-#include <string.h>
+#include <SDL2/SDL_image.h>
+#include <stdio.h> 
 #include <stdbool.h>
+#include "Bird.h"
+#include "Engine.h"
+
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
 
-//Starts up SDL and creates window
-bool init();
+typedef struct{
+	SDL_Surface *mPipeSprite;
+	SDL_Window *gWindow;
+	SDL_Surface *gScreenSurface;
+	bool mQuit;
+	Bird bird;
+	long long unsigned mTimeNow;
+	long long unsigned mTimeLast;
+}Engine;
 
+Engine gameEngine;
+bool loadMedia(Engine *e);
+bool initGame(Engine *e);
 //Frees media and shuts down SDL
-void close();
+void closeGame(Engine *e);
+void updateGame(Engine *e);
+void renderFrame(Engine *e);
+//Loads image to gpu memory
+SDL_Surface *loadSurface(char * path, Engine *e);
 
-//Loads individual image
-SDL_Surface* loadSurface( char *path );
-
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
-
-//The surface contained by the window
-SDL_Surface* gScreenSurface = NULL;
-
-
-int main( int argc, char* args[] )
-{
+int main() {
+	Engine gameEngine;
 	//Start up SDL and create window
-	if( !init() )
-	{
-		printf( "Failed to initialize!\n" );
-	}
-	else
-	{
-			//Main loop flag
-			bool quit = false;
+	if (!initGame(&gameEngine)) {
+		printf("Failed to initialize!\n");
+	} else {
+		//Load media
+		if (!loadMedia(&gameEngine)) {
+			printf("Failed to load media!\n");
+		} else {
 
 			//Event handler
 			SDL_Event e;
 
 			//While application is running
-			while( !quit )
+			while( !gameEngine.mQuit )
 			{
+
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
 				{
 					//User requests quit
 					if( e.type == SDL_QUIT )
 					{
-						quit = true;
+						gameEngine.mQuit = true;
 					}
-					//User presses a key
-					else if( e.type == SDL_KEYDOWN )
-					{
-						//Select surfaces based on key press
-						switch( e.key.keysym.sym )
-						{
-							
+					//User presses a key 
+					else if( e.type == SDL_KEYDOWN ) {
+						switch( e.key.keysym.sym ) {
+							case SDLK_SPACE:
+								birdJump(&gameEngine.bird);
+								break;
+						}
+					}
+					else if(e.type == SDL_KEYUP){
+						switch( e.key.keysym.sym ) {
+							case SDLK_SPACE:
+								break;
 						}
 					}
 				}
+				//Update part
+				updateGame(&gameEngine);
 
-				//Update the surface
-				SDL_UpdateWindowSurface( gWindow );
+				//Render part
+				renderFrame(&gameEngine);
 			}
-	}
 
+		}
+	}
 	//Free resources and close SDL
-	close();
+	closeGame(&gameEngine);
 
 	return 0;
 }
+void updateGame(Engine *e){
+	//Calculate delta time
+	e->mTimeLast = e->mTimeNow;
+	e->mTimeNow = SDL_GetPerformanceCounter();
+	double deltaTime = ((e->mTimeNow - e->mTimeLast)*1000 / (double)SDL_GetPerformanceFrequency() ) * 0.001;
+	//Update bird
+	birdUpdate(&e->bird, deltaTime);
+}
 
-bool init()
-{
+void renderFrame(Engine *e){
+	SDL_FillRect(e->gScreenSurface, NULL, 0x000000);
+	SDL_BlitScaled(e->bird.mSprite, NULL, e->gScreenSurface, &e->bird.mBounds);
+	// SDL_BlitSurface(gameSprites.mPipe, NULL, gameEngine.gScreenSurface, NULL);
+	
+	//Update the surface
+	SDL_UpdateWindowSurface(e->gWindow);
+}
+
+bool initGame(Engine *e) {
+	e->mQuit = false;
+	e->mTimeLast = 0;
+	e->mTimeNow = SDL_GetPerformanceCounter();
+	birdConstruct(&e->bird);
 	//Initialization flag
 	bool success = true;
 
 	//Initialize SDL
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-	{
-		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
 		success = false;
-	}
-	else
-	{
+	} else {
 		//Create window
-		gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-		if( gWindow == NULL )
-		{
-			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+		e->gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (e->gWindow == NULL) {
+			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 			success = false;
-		}
-		else
-		{
-			//Get window surface
-			gScreenSurface = SDL_GetWindowSurface( gWindow );
+		}else{
+			e->gScreenSurface = SDL_GetWindowSurface(e->gWindow);	
 		}
 	}
-
 	return success;
 }
 
+bool loadMedia(Engine *e) {
 
-void close()
-{
+	//Loading success flag
+	bool success = true;
+	//Load bird image
+	e->bird.mSprite = loadSurface("graphics/fbird.png", e);
+	if (e->bird.mSprite == NULL) {
+		success = false;
+	}
+	// //Load pipe image
+	// e->mPipe = loadSurface("graphics/pipe.png");
+	// if (e->mPipe == NULL) {
+	// 	success = false;
+	// }
+	return success;
+}
+
+SDL_Surface * loadSurface(char * path, Engine *e) {
+	//The final optimized image 
+	SDL_Surface * optimizedSurface = NULL;
+	//Load image at specified path 
+	SDL_Surface * loadedSurface = IMG_Load(path);
+	if (loadedSurface == NULL) {
+		printf("Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError());
+	} else {
+		//Convert surface to screen format 
+		optimizedSurface = SDL_ConvertSurface(loadedSurface, e->gScreenSurface->format, NULL);
+		if (optimizedSurface == NULL) {
+			printf("Unable to optimize image %s! SDL Error: %s\n", path, SDL_GetError());
+		}
+		//Get rid of old loaded surface 
+		SDL_FreeSurface(loadedSurface);
+	}
+	return optimizedSurface;
+}
+
+void closeGame( Engine *e) {
+	//Deallocate surface
+	SDL_FreeSurface(e->bird.mSprite);
+	e->bird.mSprite = NULL;
+	// SDL_FreeSurface(e->mPipe);
+	// e->mPipe = NULL;
+
 	//Destroy window
-	SDL_DestroyWindow( gWindow );
-	gWindow = NULL;
+	SDL_DestroyWindow(e->gWindow);
+	e->gWindow = NULL;
 
 	//Quit SDL subsystems
 	SDL_Quit();
 }
-
-SDL_Surface* loadSurface( char  *path )
-{
-	//Load image at specified path
-	SDL_Surface* loadedSurface = SDL_LoadBMP( path );
-	if( loadedSurface == NULL )
-	{
-		printf( "Unable to load image %s! SDL Error: %s\n", path, SDL_GetError() );
-	}
-
-	return loadedSurface;
-}
-

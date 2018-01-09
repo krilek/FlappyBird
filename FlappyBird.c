@@ -1,24 +1,5 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <stdio.h> 
-#include <stdbool.h>
-#include "Bird.h"
-#include "Engine.h"
+#include "FlappyBird.h"
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-
-
-typedef struct{
-	SDL_Surface *mPipeSprite;
-	SDL_Window *gWindow;
-	SDL_Surface *gScreenSurface;
-	bool mQuit;
-	Bird bird;
-	long long unsigned mTimeNow;
-	long long unsigned mTimeLast;
-}Engine;
 
 Engine gameEngine;
 bool loadMedia(Engine *e);
@@ -67,6 +48,7 @@ int main() {
 					else if(e.type == SDL_KEYUP){
 						switch( e.key.keysym.sym ) {
 							case SDLK_SPACE:
+								gameEngine.bird.mJumped = false;
 								break;
 						}
 					}

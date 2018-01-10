@@ -6,25 +6,25 @@
 extern const int SCREEN_HEIGHT;
 extern const int SCREEN_WIDTH;
 
-typedef struct{
-	float x;
-	float y;
-}Vector2f;
+typedef struct {
+    float x;
+    float y;
+} Vector2f;
 
-typedef struct{
-	SDL_Rect mBounds;
+typedef struct {
+    SDL_Rect mBounds;
     SDL_Rect mGBounds;
-	Vector2f mPos;
-	SDL_Surface *mSprite;
-	bool mJumped;
-	float mSpeed;
+    Vector2f mPos;
+    SDL_Surface* mSprite;
+    bool mJumped;
+    float mSpeed;
     float mVelocity;
     float mGravity;
     float mLift;
     float mSinceLastJump;
-}Bird;
+} Bird;
 
-void birdUpdate(Bird *b, double dTime);
-void birdJump(Bird *b);
-void birdConstruct(Bird *b);
+void birdUpdate(Bird* b, double dTime);
+void birdJump(Bird* b);
+void birdConstruct(Bird* b);
 #endif

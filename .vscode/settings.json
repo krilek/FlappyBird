@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "engine.h": "c"
+        "engine.h": "c",
+        "flappybird.h": "c"
     }
 }

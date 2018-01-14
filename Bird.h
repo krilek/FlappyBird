@@ -5,7 +5,7 @@
 #include <stdio.h>
 extern const int SCREEN_HEIGHT;
 extern const int SCREEN_WIDTH;
-
+double limit(double x, double limit);
 typedef struct {
     float x;
     float y;
@@ -13,9 +13,8 @@ typedef struct {
 
 typedef struct {
     SDL_Rect mBounds;
-    SDL_Rect mGBounds;
     Vector2f mPos;
-    SDL_Surface* mSprite;
+    SDL_Texture* mSprite;
     bool mJumped;
     float mSpeed;
     float mVelocity;

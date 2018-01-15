@@ -31,10 +31,16 @@ void scoreConstruct(Score* s)
     s->mScoreText.mTextColor.g = 255;
     s->mScoreText.mTextColor.b = 255;
     s->mScoreText.mTextColor.a = 255;
+    s->mScoreSaved = false;
     textConstruct(&s->mScoreText, "0");
 }
 void scoreSaveToAFile(Score* s, FILE* f){
     char output[200];
-    sprintf(output, "%s = %d", s->mPlayerName, s->mAcctualScore);
-    printf("%s", output);
+    sprintf(output, "%s=%d", s->mPlayerName, s->mAcctualScore);
+    for(int i=0;i<strlen(output);i++){
+        putc(output[i], f);
+    }
+    s->mScoreSaved = true;
+    //TODO: ZRÓB CZYSZCZENIE DO KOŃCA LINII
+    // printf("%s", output);
 }

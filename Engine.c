@@ -128,7 +128,9 @@ void updateGame(Engine* e)
         }
         scoreUpdate(&e->score);
     }else if(e->mState == GAME_OVER){
-        scoreSaveToAFile(&e->score, e->score.mCachedScores);
+        if(e->score.mScoreSaved == false){
+            scoreSaveToAFile(&e->score, e->score.mCachedScores);
+        }
     }
 }
 

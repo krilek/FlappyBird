@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <curl/curl.h>
 #include "json/cJSON.h"
 #include "Text.h"
@@ -12,6 +13,7 @@ typedef struct {
     char mPlayerName[20];
     unsigned mAcctualScore;
     Text mScoreText;
+    bool mScoreSaved;
     FILE* mCachedScores;
 } Score;
 

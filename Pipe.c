@@ -23,7 +23,7 @@ void pipeConstruct(Pipe* p, unsigned modifier)
     p->mVelocity = 125;
     p->mHeight = 400;
     p->mActive = false;
-    p->mFreeSpace = 300;
+    p->mFreeSpace = 200;
     pipeRandomizeSpace(p, modifier);
 }
 void pipeRandomizeSpace(Pipe* p, unsigned modifier)

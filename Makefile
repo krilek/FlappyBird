@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project 
-OBJS = FlappyBird.c Bird.c Engine.c Pipe.c Score.c json/cJSON.c
+OBJS = FlappyBird.c Bird.c Engine.c Pipe.c Score.c json/cJSON.c Text.c
 #CC specifies which compiler we're using 
 CC = gcc 
 #COMPILER_FLAGS specifies the additional compilation options we're using 

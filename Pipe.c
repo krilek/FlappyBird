@@ -23,13 +23,13 @@ void pipeConstruct(Pipe* p, unsigned modifier)
     p->mVelocity = 125;
     p->mHeight = 400;
     p->mActive = false;
+    p->mFreeSpace = 300;
     pipeRandomizeSpace(p, modifier);
 }
 void pipeRandomizeSpace(Pipe* p, unsigned modifier)
 {
     p->mPosX = SCREEN_WIDTH;
     p->mScored = false;
-    p->mFreeSpace = 150;
     //Generate center point for empty space
     //Between 100 and screen_height -100
     srand(time(NULL) * modifier);

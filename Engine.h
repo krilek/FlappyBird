@@ -3,6 +3,7 @@
 #include "Bird.h"
 #include "Pipe.h"
 #include "Score.h"
+#include "Text.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -28,6 +29,9 @@ typedef struct {
     Bird bird;
     Pipe pipes[50];
     Score score;
+    Text gameOver;
+    Text startGame;
+    Text highScores;
     long long unsigned mTimeNow;
     long long unsigned mTimeLast;
     double mSecondsSinceStart;

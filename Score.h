@@ -5,12 +5,13 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include "json/cJSON.h"
+#include "Text.h"
+extern const int SCREEN_HEIGHT;
+extern const int SCREEN_WIDTH;
 typedef struct {
+    char mPlayerName[20];
     unsigned mAcctualScore;
-    SDL_Surface* mScoreSurface;
-    SDL_Rect mBounds;
-    TTF_Font* mFont;
-    SDL_Color mTextColor;
+    Text mScoreText;
     FILE* mCachedScores;
 } Score;
 

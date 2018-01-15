@@ -22,24 +22,34 @@ bool loadMedia(Engine* e)
     if (e->bird.mSprite == NULL) {
         success = false;
     }
-    e->score.mFont = TTF_OpenFont("graphics/Sans.ttf", 24);
-    if(e->score.mFont == NULL){
+    e->score.mScoreText.mFont = TTF_OpenFont("graphics/fBirdFont.TTF", 24);
+    if (e->score.mScoreText.mFont == NULL) {
         printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
-            success= false;
-    }else{
-        e->score.mScoreSurface = TTF_RenderText_Solid(e->score.mFont, "0", e->score.mTextColor);
-        e->score.mBounds.w = e->score.mScoreSurface->w;
-        e->score.mBounds.h = e->score.mScoreSurface->h;
-        if (e->score.mScoreSurface == NULL)
-        {
+        success = false;
+    } else {
+        SDL_Color tempColor;
+        tempColor.r = 255;
+        tempColor.g = 255;
+        tempColor.b = 255;
+        tempColor.a = 255;
+        e->score.mScoreText.mTextSurface = TTF_RenderText_Solid(e->score.mScoreText.mFont, "0", tempColor);
+        if (e->score.mScoreText.mTextSurface == NULL) {
             printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
             success = false;
         }
+        e->score.mScoreText.mBounds.w = e->score.mScoreText.mTextSurface->w;
+        e->score.mScoreText.mBounds.h = e->score.mScoreText.mTextSurface->h;
     }
-    
+
     e->mPipeSprite = loadTexture("graphics/pipe.png", e);
     //Load pipe image
     if (e->mPipeSprite == NULL) {
+        success = false;
+    }
+    //Load score file
+    e->score.mCachedScores = fopen("cachedStats.txt", "r+");
+    if (e->score.mCachedScores == NULL) {
+        printf("Unable to open file cachedStats.txt");
         success = false;
     }
     return success;
@@ -75,8 +85,10 @@ void closeGame(Engine* e)
     SDL_DestroyWindow(e->gWindow);
     e->gWindow = NULL;
     // Deallocate font
-    TTF_CloseFont(e->score.mFont);
-    e->score.mFont = NULL;    
+    TTF_CloseFont(e->score.mScoreText.mFont);
+    e->score.mScoreText.mFont = NULL;
+    // Close cachedStats file
+    fclose(e->score.mCachedScores);
     // Quit SDL subsystems
     TTF_Quit();
     IMG_Quit();
@@ -109,10 +121,14 @@ void updateGame(Engine* e)
 
         for (unsigned i = 0; i < PIPES_AMOUNT; i++) {
             pipeUpdate(&e->pipes[i], deltaTime, i + 1);
-            pipeColides(&e->pipes[i], &e->bird);
+            if(pipeColides(&e->pipes[i], &e->bird)){
+                e->mState = GAME_OVER;
+            }
             pipeScored(&e->pipes[i], &e->bird, &e->score);
         }
         scoreUpdate(&e->score);
+    }else if(e->mState == GAME_OVER){
+        scoreSaveToAFile(&e->score, e->score.mCachedScores);
     }
 }
 
@@ -131,11 +147,11 @@ void renderFrame(Engine* e)
     //Copy bird to a renderer
     SDL_RenderCopy(e->mRenderer, e->bird.mSprite, NULL, &e->bird.mBounds);
     SDL_SetTextureColorMod(e->bird.mSprite, 0xFF, 0xFF, 0xFF);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(e->mRenderer, e->score.mScoreSurface);
-    if(textTexture == NULL){
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(e->mRenderer, e->score.mScoreText.mTextSurface);
+    if (textTexture == NULL) {
         printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-    }else{
-        SDL_RenderCopy(e->mRenderer, textTexture, NULL, &e->score.mBounds);
+    } else {
+        SDL_RenderCopy(e->mRenderer, textTexture, NULL, &e->score.mScoreText.mBounds);
         SDL_DestroyTexture(textTexture);
     }
     // Update the renderer
@@ -165,11 +181,11 @@ bool initGame(Engine* e)
                 printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
                 success = false;
             } else {
-                if(TTF_Init() == -1){
+                if (TTF_Init() == -1) {
                     printf("TTF_SDL could not initialize: TTF_Error: %s\n", TTF_GetError());
                     success = false;
-                }else{
-                    
+                } else {
+
                     SDL_SetRenderDrawColor(e->mRenderer, 0x00, 0x00, 0x00, 0x00);
                     e->mTimeLast = 0;
                     e->mTimeNow = SDL_GetPerformanceCounter();
@@ -189,8 +205,8 @@ bool initGame(Engine* e)
     return success;
 }
 
-
-void handleInput(Engine* e, SDL_Event *event){
+void handleInput(Engine* e, SDL_Event* event)
+{
     while (SDL_PollEvent(event) != 0) {
         // User requests quit
         if (event->type == SDL_QUIT) {

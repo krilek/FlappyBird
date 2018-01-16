@@ -9,7 +9,7 @@
         "request": "launch",
         "preLaunchTask": "build",
         "program": "${workspaceFolder}/flappyBird",
-        "args": [],
+        "args": ["-n", "Krilek"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],

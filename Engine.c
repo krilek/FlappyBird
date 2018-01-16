@@ -46,12 +46,6 @@ bool loadMedia(Engine* e)
     if (e->mPipeSprite == NULL) {
         success = false;
     }
-    //Load score file
-    e->score.mCachedScores = fopen("cachedStats.txt", "r+");
-    if (e->score.mCachedScores == NULL) {
-        printf("Unable to open file cachedStats.txt");
-        success = false;
-    }
     return success;
 }
 
@@ -87,8 +81,6 @@ void closeGame(Engine* e)
     // Deallocate font
     TTF_CloseFont(e->score.mScoreText.mFont);
     e->score.mScoreText.mFont = NULL;
-    // Close cachedStats file
-    fclose(e->score.mCachedScores);
     // Quit SDL subsystems
     TTF_Quit();
     IMG_Quit();
@@ -117,7 +109,9 @@ void updateGame(Engine* e)
             e->mWhichPipeToStart %= PIPES_AMOUNT;
         }
         // Update bird
-        birdUpdate(&e->bird, deltaTime);
+        if(birdUpdate(&e->bird, deltaTime)){
+            e->mState = GAME_OVER;
+        }
 
         for (unsigned i = 0; i < PIPES_AMOUNT; i++) {
             pipeUpdate(&e->pipes[i], deltaTime, i + 1);
@@ -196,6 +190,8 @@ bool initGame(Engine* e)
                     e->mPipeGenerationTimeLast = 0;
                     e->mState = PAUSED;
                     scoreConstruct(&e->score);
+                    //Download newest highscores
+                    scoreGetHighscores(&e->score, e->score.mCachedScores);
                     birdConstruct(&e->bird);
                     for (int i = 0; i < PIPES_AMOUNT; i++) {
                         pipeConstruct(&e->pipes[i], i + 1);

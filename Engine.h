@@ -4,9 +4,9 @@
 #include "Pipe.h"
 #include "Score.h"
 #include "Text.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include "dep/include/SDL2/SDL.h"
+#include "dep/include/SDL2/SDL_image.h"
+#include "dep/include/SDL2/SDL_ttf.h"
 #include <stdbool.h>
 const int SCREEN_HEIGHT;
 const int SCREEN_WIDTH;

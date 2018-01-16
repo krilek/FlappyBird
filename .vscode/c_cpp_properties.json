@@ -33,7 +33,7 @@
                 "/usr/lib/gcc/x86_64-pc-linux-gnu/7.2.1/include-fixed",
                 "/usr/include",
                 "${workspaceRoot}",
-                "/usr/include/SDL2"
+                "${workspaceRoot}/dep/include"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

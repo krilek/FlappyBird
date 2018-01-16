@@ -1,6 +1,6 @@
 #ifndef BIRD_H
 #define BIRD_H
-#include <SDL2/SDL.h>
+#include "dep/include/SDL2/SDL.h"
 #include <stdbool.h>
 #include <stdio.h>
 extern const int SCREEN_HEIGHT;
@@ -23,7 +23,7 @@ typedef struct {
     float mSinceLastJump;
 } Bird;
 
-void birdUpdate(Bird* b, double dTime);
+bool birdUpdate(Bird* b, double dTime);
 void birdJump(Bird* b);
 void birdConstruct(Bird* b);
 #endif

@@ -8,14 +8,12 @@ void scoreUpdate(Score* s, TTF_Font *f)
 bool scoreConstruct(Score* s, TTF_Font* f)
 {
     s->mAcctualScore = 0;
-    s->mCurrentHighScore = 0;
-    s->mScoreSaved = false;
     s->mPosY = 50;
     return textConstruct(&s->mScoreText, "0", f);
 }
 void scoreSaveToAFile(Score* s, FILE* f)
 {
-    if (s->mAcctualScore > 0) {
+    if (s->mCurrentHighScore > 0) {
         //Load score file
         f = fopen("cachedStats.csv", "r+");
         if (f == NULL) {
@@ -23,16 +21,13 @@ void scoreSaveToAFile(Score* s, FILE* f)
             return;
         }
         //First find if there is user with inputed nick
-        //dump first header line of file
         char temp[101];
         fgets(temp, 0, f);
-        bool foundedLastScore = scoreFindInFile(s, f);
-        if (!foundedLastScore) {
+        if (!scoreFindInFile(s, f)) {
             //Create a new score result
             scoreAddNewToFile(s, f);
         }
-        s->mScoreSaved = true;
-        // Close cachedStats file
+        //Close cachedStats file
         fclose(f);
     }
 }
@@ -43,9 +38,12 @@ bool scoreFindInFile(Score* s, FILE* f)
     ssize_t read;
     size_t filePos = 0;
     char* line = NULL;
+    //Read file line by line
     while ((read = getline(&line, &filePos, f)) != -1) {
+        //Preapare arrays for fields
         char readedNick[MAX_NICKNAME_LENGTH];
         char score[MAX_SCORE_DIGITS];
+        //Parse line to arrays
         size_t lastScoreLength = parseLine(line, readedNick, score, s->mPlayerName);
         if (lastScoreLength > 0) {
             if (strcmp(s->mPlayerName, readedNick) == 0) {
@@ -62,14 +60,7 @@ bool scoreFindInFile(Score* s, FILE* f)
     }
     return foundedPlayer;
 }
-bool scoreReplaceInFile(Score* s, FILE* f, size_t lenOfScore)
-{
-    char output[MAX_SCORE_DIGITS];
-    sprintf(output, "%06d\n", s->mAcctualScore);
-    fseek(f, -1 + -lenOfScore * sizeof(char), SEEK_CUR);
-    // fseek(f, -2*lenOfScore * sizeof(char), SEEK_CUR);
-    fputs(output, f);
-}
+
 size_t parseLine(char* line, char* name, char* score, char* currentPlayerNick)
 {
     int amountOfSemicolons = 0;
@@ -106,11 +97,19 @@ size_t parseLine(char* line, char* name, char* score, char* currentPlayerNick)
     return scoreLen;
 }
 
+bool scoreReplaceInFile(Score* s, FILE* f, size_t lenOfScore)
+{
+    char output[MAX_SCORE_DIGITS];
+    sprintf(output, "%06d\n", s->mCurrentHighScore);
+    fseek(f, -1 + -lenOfScore * sizeof(char), SEEK_CUR);
+    fputs(output, f);
+}
+
 bool scoreAddNewToFile(Score* s, FILE* f)
 {
     //Nicnamespace + semicolon + space for digits
     char output[MAX_NICKNAME_LENGTH + 1 + MAX_SCORE_DIGITS];
-    sprintf(output, "%s;%06d\n", s->mPlayerName, s->mAcctualScore);
+    sprintf(output, "%s;%06d\n", s->mPlayerName, s->mCurrentHighScore);
     fseek(f, 0, SEEK_END);
     fputs(output, f);
     return true;
@@ -123,7 +122,7 @@ bool uploadScoreToServer(Score* s)
     //Prepare message nick+semicolon+score
     char message[MAX_NICKNAME_LENGTH + 1 + MAX_SCORE_DIGITS];
 
-    sprintf(message, "%s;%06d\n", s->mPlayerName, s->mAcctualScore);
+    sprintf(message, "%s;%06d\n", s->mPlayerName, s->mCurrentHighScore);
     //cURL
     CURL* curl;
     CURLcode res;
@@ -141,7 +140,7 @@ bool uploadScoreToServer(Score* s)
         strcat(postFields, "&data=");
         strcat(postFields, message);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields);
-        // Perform the request
+        //Perform the request
         res = curl_easy_perform(curl);
         if (res != CURLE_OK)
             printf("Unable to perform request cURL error: %s\n", curl_easy_strerror(res));

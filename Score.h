@@ -16,7 +16,6 @@ typedef struct {
     unsigned mAcctualScore;
     unsigned mCurrentHighScore;
     Text mScoreText;
-    bool mScoreSaved;
     unsigned mPosY;
     FILE* mCachedScores;
 } Score;

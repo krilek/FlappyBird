@@ -22,7 +22,7 @@ typedef struct {
     bool mScored;
 } Pipe;
 bool pipeScored(Pipe* p, Bird* b, Score* s);
-// void pipeShow(Pipe* p);
+//void pipeShow(Pipe* p);
 void pipeConstruct(Pipe* p, unsigned modifier);
 void pipeUpdate(Pipe* p, double dTime, unsigned modifier);
 #endif

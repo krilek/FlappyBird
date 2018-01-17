@@ -15,7 +15,7 @@ void textUpdate(Text* t, TTF_Font* f, unsigned posY)
         t->mBounds.h = t->mTextSurface->h;
     }
     //Update width of a surface
-    // TTF_SizeText(f, t->mText, &t->mBounds.w, &t->mBounds.h);
+    //TTF_SizeText(f, t->mText, &t->mBounds.w, &t->mBounds.h);
     //Update position of a surface
 
     t->mBounds.x = SCREEN_WIDTH / 2 - t->mBounds.w / 2;

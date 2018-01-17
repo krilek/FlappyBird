@@ -22,8 +22,7 @@ typedef struct {
     SDL_Texture* mPipeSprite;
     SDL_Renderer* mRenderer;
     TTF_Font* mFont;
-    SDL_Window* gWindow;
-    bool mQuit;
+    SDL_Window* mWindow;
     GAME_STATE mState;
     Bird bird;
     Pipe pipes[50];
@@ -33,7 +32,6 @@ typedef struct {
     Text highScores;
     long long unsigned mTimeNow;
     long long unsigned mTimeLast;
-    double mSecondsSinceStart;
     unsigned mPipeGenerationTimeLast;
     size_t mWhichPipeToStart;
 } Engine;
@@ -41,12 +39,12 @@ typedef struct {
 double limit(double x, double limit);
 bool loadMedia(Engine* e);
 bool initGame(Engine* e);
-// Frees media and shuts down SDL
+//Frees media and shuts down SDL
 void closeGame(Engine* e);
 void handleInput(Engine* e, SDL_Event* event);
 void updateGame(Engine* e);
 void renderFrame(Engine* e);
-// Loads image to gpu memory
+//Loads image to gpu memory
 SDL_Texture* loadTexture(char* path, Engine* e);
 
 

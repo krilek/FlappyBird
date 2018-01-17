@@ -21,37 +21,35 @@ int main(int argc, char* args[])
         printHelp();
         return 0;
     }
-    // Start up SDL and create window
+    //Start up SDL and create window and init other classes
     if (!initGame(&gameEngine)) {
         printf("Failed to initialize!\n");
     } else {
-        // Load media
+        //Load media, graphics, fonts
         if (!loadMedia(&gameEngine)) {
             printf("Failed to load media!\n");
         } else {
-            // Event handler
+            //Event handler
             SDL_Event e;
 
-            // While application is running
+            //While application is running
             while (gameEngine.mState != QUITTING) {
-                // Handle events on queue
+                //Handle events
                 handleInput(&gameEngine, &e);
 
-                // Update part
+                //Update game
                 updateGame(&gameEngine);
 
-                // Render part
+                //Render game
                 renderFrame(&gameEngine);
             }
-            //Before closing game upload score to server
-            if (gameEngine.score.mScoreSaved == false) {
-                scoreSaveToAFile(&gameEngine.score, gameEngine.score.mCachedScores);
-            }
+            //Before closing game save to cached highscores
+            scoreSaveToAFile(&gameEngine.score, gameEngine.score.mCachedScores);
         }
     }
-    //Upload scores before closing game
+    //Upload scores to server before closing game
     uploadScoreToServer(&gameEngine.score);
-    // Free resources and close SDL
+    //Free resources and close SDL
     closeGame(&gameEngine);
 
     return 0;

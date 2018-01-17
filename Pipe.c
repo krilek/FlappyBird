@@ -44,7 +44,6 @@ void pipeRandomizeSpace(Pipe* p, unsigned modifier)
 
     p->mBoundsTop.x = p->mPosX;
     p->mBoundsTop.y = center - p->mFreeSpace / 2 - p->mHeight;
-    // p->mBoundsTop.y = SCREEN_HEIGHT - (p->mBoundsBottom.y + p->mFreeSpace + p->mTopHeight);
     p->mBoundsTop.w = p->mWidth;
     p->mBoundsTop.h = p->mHeight;
 }
@@ -55,7 +54,6 @@ bool pipeColides(Pipe* p, Bird* b)
             || b->mBounds.x + b->mBounds.w >= p->mBoundsBottom.x && b->mBounds.x <= p->mBoundsBottom.x + p->mBoundsBottom.w)
         && (b->mBounds.y + b->mBounds.h >= p->mBoundsTop.y && b->mBounds.y <= p->mBoundsTop.y + p->mBoundsTop.h
                || b->mBounds.y + b->mBounds.h >= p->mBoundsBottom.y && b->mBounds.y <= p->mBoundsBottom.y + p->mBoundsBottom.h)) {
-        SDL_SetTextureColorMod(b->mSprite, 0xFF, 0x00, 0x00);
         return true;
     }
     return false;

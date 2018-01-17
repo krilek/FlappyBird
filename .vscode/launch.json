@@ -1,7 +1,7 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //Use IntelliSense to learn about possible attributes.
+    //Hover to view descriptions of existing attributes.
+    //For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [{
         "name": "(gdb) Launch",
@@ -9,7 +9,7 @@
         "request": "launch",
         "preLaunchTask": "build",
         "program": "${workspaceFolder}/flappyBird",
-        "args": ["-n", "Ania"],
+        "args": ["-n", "Testy3"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],

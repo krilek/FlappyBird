@@ -22,51 +22,56 @@ SDL_Texture* loadTexture(char* path, Engine* e)
 
 bool initGame(Engine* e)
 {
-    // Initialization flag
     bool success = true;
 
-    // Initialize SDL
+    //Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         success = false;
     } else {
-        // Create window
-        e->gWindow = SDL_CreateWindow("FlappyBird", SDL_WINDOWPOS_UNDEFINED,
+        //Create window
+        e->mWindow = SDL_CreateWindow("FlappyBird", SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
             SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-        if (e->gWindow == NULL) {
+        if (e->mWindow == NULL) {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
             success = false;
         } else {
-            e->mRenderer = SDL_CreateRenderer(e->gWindow, -1, SDL_RENDERER_ACCELERATED);
+            //Create rendered for window, using Open_GL
+            e->mRenderer = SDL_CreateRenderer(e->mWindow, -1, SDL_RENDERER_ACCELERATED);
             if (e->mRenderer == NULL) {
                 printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
                 success = false;
             } else {
+                //Init image sdl font lib
                 if (TTF_Init() == -1) {
                     printf("TTF_SDL could not initialize: TTF_Error: %s\n", TTF_GetError());
                     success = false;
                 } else {
+                    //Set starting values
                     SDL_SetRenderDrawColor(e->mRenderer, 0x00, 0x00, 0x00, 0x00);
                     e->mTimeLast = 0;
                     e->mTimeNow = SDL_GetPerformanceCounter();
-                    e->mSecondsSinceStart = 0.0;
                     e->mWhichPipeToStart = 0;
                     e->mPipeGenerationTimeLast = 0;
+                    e->score.mCurrentHighScore = 0;
                     e->mState = START;
                     //Download newest highscores
                     scoreGetHighscores(&e->score, e->score.mCachedScores);
                     birdConstruct(&e->bird);
+                    //Load font for all existing text
                     e->mFont = TTF_OpenFont("graphics/fBirdFont.TTF", 24);
                     if (e->mFont == NULL) {
                         printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
                         success = false;
                     } else {
+                        //Setup texts
                         if (!(scoreConstruct(&e->score, e->mFont) && textConstruct(&e->gameOver, "Oh snap! You lose!\nPress Enter to start again!\nPress Escape to exit!", e->mFont) && textConstruct(&e->startGame, "Flappy Bird\nCreated by Krilek\nPress Enter to start game", e->mFont))) {
                             success = false;
                         }
                             textUpdate(&e->gameOver, e->mFont, SCREEN_HEIGHT/2);
                     }
+                    //Setup pipes
                     for (int i = 0; i < PIPES_AMOUNT; i++) {
                         pipeConstruct(&e->pipes[i], i + 1);
                     }
@@ -79,9 +84,9 @@ bool initGame(Engine* e)
 
 bool loadMedia(Engine* e)
 {
-    // Loading success flag
+    //Loading flag
     bool success = true;
-    // Load bird image
+    //Load bird image
     e->bird.mSprite = loadTexture("graphics/fbird.png", e);
     if (e->bird.mSprite == NULL) {
         success = false;
@@ -97,11 +102,11 @@ bool loadMedia(Engine* e)
 void handleInput(Engine* e, SDL_Event* event)
 {
     while (SDL_PollEvent(event) != 0) {
-        // User requests quit
+        //User closes window
         if (event->type == SDL_QUIT) {
             e->mState = QUITTING;
         }
-        // User presses a key
+        //User presses a key
         else if (event->type == SDL_KEYDOWN) {
             switch (event->key.keysym.sym) {
             case SDLK_SPACE:
@@ -135,14 +140,12 @@ void handleInput(Engine* e, SDL_Event* event)
 
 void updateGame(Engine* e)
 {
-    // Calculate delta time
+    //Calculate delta time
     e->mTimeLast = e->mTimeNow;
     e->mTimeNow = SDL_GetPerformanceCounter();
     double deltaTime = ((e->mTimeNow - e->mTimeLast) * 1000 / (double)SDL_GetPerformanceFrequency()) / 1000;
-    e->mSecondsSinceStart += deltaTime;
     unsigned currentTime = SDL_GetTicks();
     if (e->mState == PLAYING) {
-        //TODO: Fix all timing + pausing problems
         if (e->mWhichPipeToStart < PIPES_AMOUNT && currentTime > e->mPipeGenerationTimeLast + 2000) {
             if (e->pipes[e->mWhichPipeToStart].mActive == false) {
                 e->pipes[e->mWhichPipeToStart].mActive = true;
@@ -151,7 +154,7 @@ void updateGame(Engine* e)
             }
             e->mWhichPipeToStart %= PIPES_AMOUNT;
         }
-        // Update bird
+        //Update bird
         if (birdUpdate(&e->bird, deltaTime)) {
             e->mState = GAME_OVER;
         }
@@ -169,8 +172,6 @@ void updateGame(Engine* e)
         if (e->score.mAcctualScore > e->score.mCurrentHighScore) {
             e->score.mCurrentHighScore = e->score.mAcctualScore;
         }
-        //This is not nessesary because text doesn't change but deadline is comming
-        // textUpdate(&e->gameOver, e->mFont, SCREEN_HEIGHT/2);
     }
 }
 double limit(double x, double limit)
@@ -198,7 +199,8 @@ void renderFrame(Engine* e)
 
         //Copy bird to a renderer
         SDL_RenderCopy(e->mRenderer, e->bird.mSprite, NULL, &e->bird.mBounds);
-        SDL_SetTextureColorMod(e->bird.mSprite, 0xFF, 0xFF, 0xFF);
+
+        //TODO: Should be refactored
         if (e->mState != GAME_OVER) {
             SDL_Texture* textTexture = SDL_CreateTextureFromSurface(e->mRenderer, e->score.mScoreText.mTextSurface);
             if (textTexture == NULL) {
@@ -225,13 +227,13 @@ void renderFrame(Engine* e)
             SDL_DestroyTexture(textTexture);
         }
     }
-    // Update the renderer
+    //Update the renderer
     SDL_RenderPresent(e->mRenderer);
 }
 
 void closeGame(Engine* e)
 {
-    //Deallocate all textures
+    //Deallocate textures
     SDL_DestroyTexture(e->bird.mSprite);
     e->bird.mSprite = NULL;
     SDL_DestroyTexture(e->mPipeSprite);
@@ -239,13 +241,13 @@ void closeGame(Engine* e)
     //Deallocate renderer
     SDL_DestroyRenderer(e->mRenderer);
     e->mRenderer = NULL;
-    // Destroy window
-    SDL_DestroyWindow(e->gWindow);
-    e->gWindow = NULL;
-    // Deallocate font
+    //Destroy window
+    SDL_DestroyWindow(e->mWindow);
+    e->mWindow = NULL;
+    //Deallocate font
     TTF_CloseFont(e->mFont);
     e->mFont = NULL;
-    // Quit SDL subsystems
+    //Quit SDL subsystems
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
@@ -256,7 +258,6 @@ void resetGame(Engine* e){
     birdConstruct(&e->bird);
     e->mTimeLast = 0;
     e->mTimeNow = SDL_GetPerformanceCounter();
-    e->mSecondsSinceStart = 0.0;
     e->mWhichPipeToStart = 0;
     e->mPipeGenerationTimeLast = 0;
     for (int i = 0; i < PIPES_AMOUNT; i++) {

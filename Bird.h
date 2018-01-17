@@ -1,6 +1,6 @@
 #ifndef BIRD_H
 #define BIRD_H
-#include "dep/include/SDL2/SDL.h"
+#include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
 extern const int SCREEN_HEIGHT;

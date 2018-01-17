@@ -17,12 +17,12 @@ bool birdUpdate(Bird* b, double dTime)
     if (b->mPos.y + b->mBounds.h / 2 > SCREEN_HEIGHT) {
         b->mPos.y = SCREEN_HEIGHT - b->mBounds.h / 2;
         b->mVelocity = limit(b->mVelocity, 0);
-        // return true;
+        return true;
     }
     if (b->mPos.y + b->mBounds.h / 2 < 0) {
         b->mPos.y = 0 - (b->mBounds.h / 2);
         b->mVelocity = limit(b->mVelocity, 0);
-        // return true;
+        return true;
     }
     b->mBounds.y = (int)(b->mPos.y);
     b->mBounds.x = (int)(b->mPos.x);

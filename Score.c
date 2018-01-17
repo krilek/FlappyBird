@@ -1,37 +1,17 @@
 #include "Score.h"
 
-void scoreUpdate(Score* s)
+void scoreUpdate(Score* s, TTF_Font *f)
 {
-    printf("%d\n", s->mAcctualScore);
-    //Get rid of existing surface
-    if (s->mScoreText.mTextSurface != NULL) {
-        SDL_FreeSurface(s->mScoreText.mTextSurface);
-        s->mScoreText.mTextSurface = NULL;
-    }
-    char scoreText[10];
-    sprintf(scoreText, "%d", s->mAcctualScore);
-    s->mScoreText.mTextSurface = TTF_RenderText_Solid(s->mScoreText.mFont, scoreText, s->mScoreText.mTextColor);
-    //Update width of a surface
-    TTF_SizeText(s->mScoreText.mFont, scoreText, &s->mScoreText.mBounds.w, &s->mScoreText.mBounds.h);
-    //Update position of a surface
-    s->mScoreText.mBounds.x = SCREEN_WIDTH / 2 - s->mScoreText.mBounds.w / 2;
-    if (s->mScoreText.mTextSurface == NULL) {
-        printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-    }
+    sprintf(s->mScoreText.mText, "%d", s->mAcctualScore);
+    textUpdate(&s->mScoreText, f, s->mPosY);
 }
-void scoreConstruct(Score* s)
+bool scoreConstruct(Score* s, TTF_Font* f)
 {
-    s->mAcctualScore = 20;
-    s->mScoreText.mBounds.w = 50;
-    s->mScoreText.mBounds.h = 50;
-    s->mScoreText.mBounds.x = SCREEN_WIDTH / 2 - s->mScoreText.mBounds.w / 2;
-    s->mScoreText.mBounds.y = 50;
-    s->mScoreText.mTextColor.r = 255;
-    s->mScoreText.mTextColor.g = 255;
-    s->mScoreText.mTextColor.b = 255;
-    s->mScoreText.mTextColor.a = 255;
+    s->mAcctualScore = 0;
+    s->mCurrentHighScore = 0;
     s->mScoreSaved = false;
-    textConstruct(&s->mScoreText, "0");
+    s->mPosY = 50;
+    return textConstruct(&s->mScoreText, "0", f);
 }
 void scoreSaveToAFile(Score* s, FILE* f)
 {
@@ -50,11 +30,8 @@ void scoreSaveToAFile(Score* s, FILE* f)
         if (!foundedLastScore) {
             //Create a new score result
             scoreAddNewToFile(s, f);
-            // sprintf(output, "%s;%06d\n", s->mPlayerName, s->mAcctualScore);
-            // printf("%s", output);
         }
         s->mScoreSaved = true;
-        //TODO: ZRÓB CZYSZCZENIE DO KOŃCA LINII
         // Close cachedStats file
         fclose(f);
     }
@@ -74,8 +51,7 @@ bool scoreFindInFile(Score* s, FILE* f)
             if (strcmp(s->mPlayerName, readedNick) == 0) {
                 foundedPlayer = true;
                 unsigned long long scoreInt = atoi(score);
-                if (scoreInt < s->mAcctualScore) {
-                    printf("score: %s", score);
+                if (scoreInt < s->mCurrentHighScore) {
                     scoreReplaceInFile(s, f, lastScoreLength);
                 }
             }
@@ -164,7 +140,6 @@ bool uploadScoreToServer(Score* s)
         strcat(postFields, newbieProtection);
         strcat(postFields, "&data=");
         strcat(postFields, message);
-        printf("%s", postFields);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields);
         // Perform the request
         res = curl_easy_perform(curl);

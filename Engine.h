@@ -4,9 +4,9 @@
 #include "Pipe.h"
 #include "Score.h"
 #include "Text.h"
-#include "dep/include/SDL2/SDL.h"
-#include "dep/include/SDL2/SDL_image.h"
-#include "dep/include/SDL2/SDL_ttf.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdbool.h>
 const int SCREEN_HEIGHT;
 const int SCREEN_WIDTH;
@@ -14,15 +14,14 @@ const int PIPES_AMOUNT;
 typedef enum g_state{
     START,
     PLAYING,
-    PAUSED,
     GAME_OVER,
     QUITTING
 } GAME_STATE;
 
 typedef struct {
     SDL_Texture* mPipeSprite;
-    SDL_Surface* TESTING;
     SDL_Renderer* mRenderer;
+    TTF_Font* mFont;
     SDL_Window* gWindow;
     bool mQuit;
     GAME_STATE mState;

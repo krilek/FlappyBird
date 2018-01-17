@@ -43,6 +43,10 @@ int main(int argc, char* args[])
                 // Render part
                 renderFrame(&gameEngine);
             }
+            //Before closing game upload score to server
+            if (gameEngine.score.mScoreSaved == false) {
+                scoreSaveToAFile(&gameEngine.score, gameEngine.score.mCachedScores);
+            }
         }
     }
     //Upload scores before closing game

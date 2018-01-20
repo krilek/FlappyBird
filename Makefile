@@ -6,7 +6,7 @@ CC = gcc
 # -w suppresses all warnings 
 COMPILER_FLAGS = -w -Wall -Wextra -ggdb -std=c11 -Wl,-rpath -Wl,./dep/lib
 #LINKER_FLAGS specifies the libraries we're linking against 
-LINKER_FLAGS = -I./dep/include -L./dep/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lcurl
+LINKER_FLAGS = -I./dep/include -L./dep/lib -lSDL2 -lSDL2_image -lSDL2_ttf -lcurl -lpng -lzlib
 #OBJ_NAME specifies the name of our exectuable 
 OBJ_NAME = flappyBird 
 #This is the target that compiles our executable 
